@@ -7,6 +7,7 @@ let indexStart = 0;
 let timeCount = 0;
 let directions = [line, diagonal, diagonal2, up]
 let moveSpawnerGroup;
+let danceMoveController;
 let spawnerController = [
 	{
 		time: 1,
@@ -21,7 +22,7 @@ let spawnerController = [
 		move: 1
 	}
 ]
-let isDanceComplete = false;
+let isGameStarted = false;
 
 function preload(){
 	
@@ -50,12 +51,14 @@ function setup() {
 		targets.collider = 'none'
 
 	moveSpawner = new Sprite(width, height-25, 50, 50, 'none');
-		moveSpawner.vel.x = -3
+		//moveSpawner.vel.x = -3
 		moveSpawner.sequence = [0, 1, 1, 1, 3, 3, 2, 2];
 
 	moveSpawnerGroup = new Group();
 		//moveSpawnerGroup.vel.x = -2;
 		moveSpawnerGroup.sequence = spawnerController;
+
+	danceMoveController = new Sprite(width/5, height/2, 10, 100, 'static');
 	textSize(20)
 	// while(targets.length < 10){
 	// 	let target = new targets.Sprite();
@@ -91,25 +94,20 @@ function draw() {
 
 	if(handController.overlaps(timerController)) console.log('teste')
 	
-	if(targets.length > 0 && moveSpawner.overlapping(timerController)){
-		if(handController.overlaps(targets[0])){
-			targets[0].remove();
-		}
-	}
+	
 
-	if(moveSpawner.overlaps(timerController)){
-		targets.removeAll()
-		console.log(moveSpawner.sequence)
-		let getMovement = moveSpawner.sequence.shift();
-		setTimeout(() => generatePath(targets, getMovement), 250)
-		targets.life = 60;
-	}
+	// if(moveSpawner.overlaps(timerController)){
+	// 	targets.removeAll()
+	// 	console.log(moveSpawner.sequence)
+	// 	let getMovement = moveSpawner.sequence.shift();
+	// 	setTimeout(() => generatePath(targets, getMovement), 250)
+	// 	targets.life = 60;
+	// }
 
-	if(moveSpawner.x < -25) moveSpawner.x = width
+	// if(moveSpawner.x < -25) moveSpawner.x = width
 	//console.log(targets.life)
-
-	moveSpawnerGroup.length ? isDanceComplete = true : null
-	if(moveSpawnerGroup.length <= 0 && !isDanceComplete){
+	if(moveSpawnerGroup.length <= 0 && isGameStarted == false){
+		isGameStarted = true
 		spawnerController.forEach((item) => {
 			let spawnerSprite = new moveSpawnerGroup.Sprite();
 			spawnerSprite.x = width
@@ -117,9 +115,31 @@ function draw() {
 			spawnerSprite.sequence = {time: item.time, move: item.move}
 		})
 	}
+
+	if(moveSpawnerGroup.length <= 0) text('Jogo Completo', 150, 150);
+
 	if(moveSpawnerGroup.length > 0){
-		moveSpawnerGroup[0].vel.x = -moveSpawnerGroup[0].sequence.time;
-		(moveSpawnerGroup[0].x < - 20) ? moveSpawnerGroup.shift() : null;
+		if(moveSpawnerGroup[0].overlaps(danceMoveController)){
+			moveSpawnerGroup[0].life = 60*moveSpawnerGroup[0].sequence.time
+			targets.removeAll()
+			let getMovement = moveSpawnerGroup[0].sequence.move
+			setTimeout(() => generatePath(targets, getMovement), 250)
+			targets.life = 60*moveSpawnerGroup[0].sequence.time
+		}
+		if(moveSpawnerGroup[0].overlapping(danceMoveController)){
+			moveSpawnerGroup[0].vel.x = 0
+			// if(handController.overlaps(targets[0])){
+			// 	targets[0].remove();
+			// }
+		} else {
+			moveSpawnerGroup[0].vel.x = -10;
+		}
+		//(moveSpawnerGroup[0].x < - 20) ? moveSpawnerGroup.shift() : null;
+		if(targets.length > 0 && moveSpawnerGroup[0].overlapping(danceMoveController)){
+			if(handController.overlaps(targets[0])){
+				targets[0].remove();
+			}
+		}
 	}
 	
 
