@@ -21,6 +21,7 @@ let spawnerController = [
 		move: 1
 	}
 ]
+let isDanceComplete = false;
 
 function preload(){
 	
@@ -53,7 +54,7 @@ function setup() {
 		moveSpawner.sequence = [0, 1, 1, 1, 3, 3, 2, 2];
 
 	moveSpawnerGroup = new Group();
-		moveSpawnerGroup.vel.x = -2;
+		//moveSpawnerGroup.vel.x = -2;
 		moveSpawnerGroup.sequence = spawnerController;
 	textSize(20)
 	// while(targets.length < 10){
@@ -105,8 +106,21 @@ function draw() {
 	}
 
 	if(moveSpawner.x < -25) moveSpawner.x = width
-	console.log(targets.life)
+	//console.log(targets.life)
 
+	moveSpawnerGroup.length ? isDanceComplete = true : null
+	if(moveSpawnerGroup.length <= 0 && !isDanceComplete){
+		spawnerController.forEach((item) => {
+			let spawnerSprite = new moveSpawnerGroup.Sprite();
+			spawnerSprite.x = width
+			spawnerSprite.collider = 'none'
+			spawnerSprite.sequence = {time: item.time, move: item.move}
+		})
+	}
+	if(moveSpawnerGroup.length > 0){
+		moveSpawnerGroup[0].vel.x = -moveSpawnerGroup[0].sequence.time;
+		(moveSpawnerGroup[0].x < - 20) ? moveSpawnerGroup.shift() : null;
+	}
 	
 
 
