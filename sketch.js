@@ -12,23 +12,23 @@ let spawnerController = [
 	//* Baby Shark
 	{
 		time: 1.5,
+		move_right: 10,
+		move_left: 9
+	},
+	{
+		time: 3,
+		move_right: 8,
+		move_left: 7
+	},
+	{
+		time: 3,
 		move_right: 5,
 		move_left: 6
 	},
 	{
-		time: 1,
-		move_right: 7,
-		move_left: 8
-	},
-	{
 		time: .7,
-		move_right: 5,
-		move_left: 6
-	},
-	{
-		time: .7,
-		move_right: 7,
-		move_left: 8
+		move_right: 8,
+		move_left: 7
 	},
 	{
 		time: .7,
@@ -37,14 +37,14 @@ let spawnerController = [
 	},
 	//* Mommy shark
 	{
-		time: 1,
+		time: .8,
 		move_right: 5,
 		move_left: 6
 	},
 	{
 		time: .7,
-		move_right: 7,
-		move_left: 8
+		move_right: 8,
+		move_left: 7
 	},
 	{
 		time: .7,
@@ -53,19 +53,19 @@ let spawnerController = [
 	},
 	{
 		time: .7,
-		move_right: 7,
-		move_left: 8
+		move_right: 8,
+		move_left: 7
 	},
 	//* Daddy Shark
 	{
-		time: 1,
+		time: .8,
 		move_right: 5,
 		move_left: 6
 	},
 	{
 		time: .7,
-		move_right: 7,
-		move_left: 8
+		move_right: 8,
+		move_left: 7
 	},
 	{
 		time: .7,
@@ -74,9 +74,73 @@ let spawnerController = [
 	},
 	{
 		time: .7,
-		move_right: 7,
-		move_left: 8
+		move_right: 8,
+		move_left: 7
 	},
+	//* Grandma Shark
+	{
+		time: .8,
+		move_right: 5,
+		move_left: 6
+	},
+	{
+		time: .7,
+		move_right: 8,
+		move_left: 7
+	},
+	{
+		time: .7,
+		move_right: 5,
+		move_left: 6
+	},
+	{
+		time: .7,
+		move_right: 8,
+		move_left: 7
+	},
+	//* Grandpa Shark
+	{
+		time: .8,
+		move_right: 5,
+		move_left: 6
+	},
+	{
+		time: .7,
+		move_right: 8,
+		move_left: 7
+	},
+	{
+		time: .7,
+		move_right: 5,
+		move_left: 6
+	},
+	{
+		time: .7,
+		move_right: 8,
+		move_left: 7
+	},
+	//* The End
+	{
+		time: .8,
+		move_right: 9,
+		move_left: ''
+	},
+	{
+		time: .7,
+		move_right: '',
+		move_left: 10
+	},
+	{
+		time: .7,
+		move_right: 9,
+		move_left: ''
+	},
+	{
+		time: .7,
+		move_right: '',
+		move_left: 10
+	},
+	
 ]
 let isGameStarted = false;
 
@@ -150,8 +214,8 @@ function setup() {
 		handThumb.collider = handIndex.collider = 'none'
 	rightHand = new Sprite();
 	leftHand = new Sprite();
-		rightHand.diameter = leftHand.diameter = 25;
-		rightHand.collider = leftHand.collider = 'none';
+		rightHand.diameter = leftHand.diameter = 50;
+		//rightHand.collider = leftHand.collider = 'none';
 	handParticles = new Group();
 	handParticles.collider = 'none';
 	handParticles.direction = () => random(0, 360);
@@ -167,7 +231,7 @@ function setup() {
 		instructionsButton.collider = 'none'
 		instructionsButton.layer = -1
 
-	headCalibrate = new Sprite(width/2, height/2 - 100, 50, 50, 'none');
+	headCalibrate = new Sprite(width/2, height/2 - 200, 50, 50, 'none');
 		// headCalibrate.visible = false;
 
 	clickStartTime = millis();
@@ -209,6 +273,8 @@ function draw() {
 		if(!isPlayingMusic){
 			music1.play();
 			isPlayingMusic = true;
+			startButton.x = -1000
+			instructionsButton.x = -1000
 		}
 		timeCount = round(frameCount/60, 2);
 		text(timeCount, 100, 100);
@@ -257,16 +323,16 @@ function draw() {
 				moveSpawnerGroup[0].vel.x = -15;
 			}
 			//(moveSpawnerGroup[0].x < - 20) ? moveSpawnerGroup.shift() : null;
-			if(leftTargets.length > 0 && moveSpawnerGroup[0].overlapping(danceMoveController)){
-				if(handController.overlaps(leftTargets[0])){
-					leftTargets[0].remove();
-				}
+			if(leftTargets.length > 0 && rightTargets.length > 0 && moveSpawnerGroup[0].overlapping(danceMoveController)){
+				if(leftHand.overlaps(leftTargets[0])) leftTargets[0].remove();
+				if(rightHand.overlaps(rightTargets[0])) rightTargets[0].remove();
+				
 			}
 		}
 
 	}
 
-	if(hands.length > 0){
+	if(hands.length == 1){
 		//console.log(hands)
 		let { thumb_tip, index_finger_tip, middle_finger_mcp } = hands[0];
 		//let { right_middle_finger_mcp } = hands[0];
@@ -284,8 +350,8 @@ function draw() {
 	}
 
 	if(hands.length == 2){
-		let right_middle_finger_mcp = hands[0].middle_finger_mcp;
-		let left_middle_finger_mcp = hands[1].middle_finger_mcp;
+		let right_middle_finger_mcp = hands[0].wrist;
+		let left_middle_finger_mcp = hands[1].wrist;
 
 		rightHand.visible = leftHand.visible = true;
 
@@ -385,6 +451,23 @@ function generatePath(targets, value){
 				target.x = headCalibrate.x + 200
 			}
 			break;
+		case 9:
+			while(targets.length < 10){
+				let target = new targets.Sprite()
+				target.text = targets.length;
+				target.y = headCalibrate.y + (targets.length * 25)
+				target.x = headCalibrate.x - 200
+			}
+			break;
+		case 10:
+			while(targets.length < 10){
+				let target = new targets.Sprite()
+				target.text = targets.length;
+				target.y = headCalibrate.y + (targets.length * 25)
+				target.x = headCalibrate.x + 200
+			}
+			break;
+
 	}
 }
 
