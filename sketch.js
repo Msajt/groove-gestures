@@ -9,18 +9,74 @@ let directions = [line, diagonal, diagonal2, up]
 let moveSpawnerGroup;
 let danceMoveController;
 let spawnerController = [
+	//* Baby Shark
 	{
-		time: 3,
-		move: 6
+		time: 1.5,
+		move_right: 5,
+		move_left: 6
 	},
 	{
-		time: 2,
-		move: 6
+		time: 1,
+		move_right: 7,
+		move_left: 8
 	},
 	{
-		time: 2,
-		move: 6
-	}
+		time: .7,
+		move_right: 5,
+		move_left: 6
+	},
+	{
+		time: .7,
+		move_right: 7,
+		move_left: 8
+	},
+	{
+		time: .7,
+		move_right: 5,
+		move_left: 6
+	},
+	//* Mommy shark
+	{
+		time: 1,
+		move_right: 5,
+		move_left: 6
+	},
+	{
+		time: .7,
+		move_right: 7,
+		move_left: 8
+	},
+	{
+		time: .7,
+		move_right: 5,
+		move_left: 6
+	},
+	{
+		time: .7,
+		move_right: 7,
+		move_left: 8
+	},
+	//* Daddy Shark
+	{
+		time: 1,
+		move_right: 5,
+		move_left: 6
+	},
+	{
+		time: .7,
+		move_right: 7,
+		move_left: 8
+	},
+	{
+		time: .7,
+		move_right: 5,
+		move_left: 6
+	},
+	{
+		time: .7,
+		move_right: 7,
+		move_left: 8
+	},
 ]
 let isGameStarted = false;
 
@@ -40,10 +96,14 @@ let clickRadius = 10;
 let gameState = 'game';
 let startButton, instructionsButton;
 
+let music1, isPlayingMusic = false;
+
 // Under the Sea, I Will Survive, Shape of You, Kulikitaka, Chacarron
 
 function preload(){
 	handPose = ml5.handPose();
+	music1 = loadSound('./sounds/baby_shark_short.mp3');
+
 }
 
 function setup() {
@@ -79,8 +139,8 @@ function setup() {
 	moveSpawnerGroup = new Group();
 		moveSpawnerGroup.sequence = spawnerController;
 
-	danceMoveController = new Sprite(width/5, height-50, 10, 100, 'static');
-		danceMoveController.visible = false;
+	danceMoveController = new Sprite(width/2, height-50, 10, 100, 'static');
+		danceMoveController.visible = true;
 	textSize(20)
 
 	handIndex = new Sprite();
@@ -146,6 +206,10 @@ function draw() {
 		startButton.y = height - 75;
 	} 
 	else if(gameState == 'game'){
+		if(!isPlayingMusic){
+			music1.play();
+			isPlayingMusic = true;
+		}
 		timeCount = round(frameCount/60, 2);
 		text(timeCount, 100, 100);
 
@@ -162,7 +226,7 @@ function draw() {
 				spawnerSprite.x = width + 25
 				spawnerSprite.y = height - 50
 				spawnerSprite.collider = 'none'
-				spawnerSprite.sequence = {time: item.time, move: item.move}
+				spawnerSprite.sequence = {time: item.time, move_right: item.move_right, move_left: item.move_left}
 			})
 		}
 
@@ -173,10 +237,12 @@ function draw() {
 				moveSpawnerGroup[0].life = 60*moveSpawnerGroup[0].sequence.time
 				leftTargets.removeAll()
 				rightTargets.removeAll();
-				let getMovement = moveSpawnerGroup[0].sequence.move
+				let getMovementRight = moveSpawnerGroup[0].sequence.move_right;
+				let getMovementLeft = moveSpawnerGroup[0].sequence.move_left;
+				//console.log(getMovement);
 				setTimeout(() => { 
-					generatePath(leftTargets, 5) 
-					generatePath(rightTargets, 6)
+					generatePath(leftTargets, getMovementLeft) 
+					generatePath(rightTargets, getMovementRight)
 					//console.log('teste');
 				}, 250)
 				leftTargets.life = 60*moveSpawnerGroup[0].sequence.time
@@ -188,7 +254,7 @@ function draw() {
 				// 	leftTargets[0].remove();
 				// }
 			} else {
-				moveSpawnerGroup[0].vel.x = -5;
+				moveSpawnerGroup[0].vel.x = -15;
 			}
 			//(moveSpawnerGroup[0].x < - 20) ? moveSpawnerGroup.shift() : null;
 			if(leftTargets.length > 0 && moveSpawnerGroup[0].overlapping(danceMoveController)){
@@ -273,6 +339,7 @@ function generatePath(targets, value){
 				target.x = 250 + (targets.length*5)
 			}
 			break;
+		//? ESQUERDA - CIMA
 		case 5:
 			while(targets.length < 10){
 				let target = new targets.Sprite()
@@ -283,6 +350,7 @@ function generatePath(targets, value){
 				target.x = headCalibrate.x - 200
 			}
 			break;
+		//? ESQUERDA - BAIXO
 		case 6:
 			while(targets.length < 10){
 				let target = new targets.Sprite()
@@ -292,6 +360,29 @@ function generatePath(targets, value){
 				else target.y = headCalibrate.y + 300 + ((targets.length-10) * 25)
 				
 				target.x = headCalibrate.x - 200
+			}
+			break;
+		//? DIREITA - CIMA
+		case 7:
+			while(targets.length < 10){
+				let target = new targets.Sprite()
+				target.text = targets.length;
+				if(targets.length < 5) target.y = headCalibrate.y + (targets.length * 25)
+					else target.y = headCalibrate.y - ((targets.length-10) * 25);
+				
+				target.x = headCalibrate.x + 200
+			}
+			break;
+		//? ESQUERDA - CIMA
+		case 8:
+			while(targets.length < 10){
+				let target = new targets.Sprite()
+				target.text = targets.length;
+				
+				if(targets.length < 5) target.y = headCalibrate.y + 300 - (targets.length * 25)
+				else target.y = headCalibrate.y + 300 + ((targets.length-10) * 25)
+				
+				target.x = headCalibrate.x + 200
 			}
 			break;
 	}
