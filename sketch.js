@@ -10,16 +10,16 @@ let moveSpawnerGroup;
 let danceMoveController;
 let spawnerController = [
 	{
-		time: 1,
-		move: 0
+		time: 3,
+		move: 6
 	},
 	{
 		time: 2,
-		move: 2
+		move: 6
 	},
 	{
-		time: 4,
-		move: 1
+		time: 2,
+		move: 6
 	}
 ]
 let isGameStarted = false;
@@ -28,14 +28,16 @@ let handPose;
 let video;
 let hands = [];
 
-let handThumb, handIndex;
+let handThumb, handIndex, rightHand, leftHand;
+let handParticles;
+let headCalibrate;
 
 //? Animação ao fazer movimento de pinça
 let clickStartTime;
 let clickDuration = 2000;
 let clickRadius = 10;
 
-let gameState = 'main-menu';
+let gameState = 'game';
 let startButton, instructionsButton;
 
 // Under the Sea, I Will Survive, Shape of You, Kulikitaka, Chacarron
@@ -48,7 +50,6 @@ function setup() {
 	new Canvas(960, 540);
 
 	frameRate(60);
-	
 	//? ===== CAMERA =====
 	video = createCapture(video);
 	video.size(960, 540);
@@ -87,6 +88,15 @@ function setup() {
 	handThumb = new Sprite();
 		handThumb.w = handThumb.h = 25;
 		handThumb.collider = handIndex.collider = 'none'
+	rightHand = new Sprite();
+	leftHand = new Sprite();
+		rightHand.diameter = leftHand.diameter = 25;
+		rightHand.collider = leftHand.collider = 'none';
+	handParticles = new Group();
+	handParticles.collider = 'none';
+	handParticles.direction = () => random(0, 360);
+	handParticles.vel.y = -6;
+	handParticles.life = 15;
 
 	startButton = new Sprite(width/2, height/2, 250, 75, 'none');
 		startButton.layer = -1;
@@ -96,6 +106,9 @@ function setup() {
 		instructionsButton.y = 350;
 		instructionsButton.collider = 'none'
 		instructionsButton.layer = -1
+
+	headCalibrate = new Sprite(width/2, height/2 - 100, 50, 50, 'none');
+		// headCalibrate.visible = false;
 
 	clickStartTime = millis();
 }
@@ -109,7 +122,6 @@ function draw() {
 		scale(-1, 1);
 		image(video, -1, 1, width, height);
     pop();
-
 	
 	//? ===== CAMERA =====
 
@@ -163,8 +175,8 @@ function draw() {
 				rightTargets.removeAll();
 				let getMovement = moveSpawnerGroup[0].sequence.move
 				setTimeout(() => { 
-					generatePath(leftTargets, getMovement) 
-					generatePath(rightTargets, 3)
+					generatePath(leftTargets, 5) 
+					generatePath(rightTargets, 6)
 					//console.log('teste');
 				}, 250)
 				leftTargets.life = 60*moveSpawnerGroup[0].sequence.time
@@ -190,11 +202,37 @@ function draw() {
 
 	if(hands.length > 0){
 		//console.log(hands)
-		let { thumb_tip, index_finger_tip } = hands[0];
+		let { thumb_tip, index_finger_tip, middle_finger_mcp } = hands[0];
+		//let { right_middle_finger_mcp } = hands[0];
+		//let { left_middle_finger_mcp } = hands[1];
+
+		//* Movimento de pinça
 		handThumb.x = width - thumb_tip.x;
 		handThumb.y = thumb_tip.y;
 		handIndex.x = width - index_finger_tip.x;
 		handIndex.y = index_finger_tip.y;
+
+		handThumb.visible = handIndex.visible = true
+	} else {
+		handThumb.visible = handIndex.visible = false
+	}
+
+	if(hands.length == 2){
+		let right_middle_finger_mcp = hands[0].middle_finger_mcp;
+		let left_middle_finger_mcp = hands[1].middle_finger_mcp;
+
+		rightHand.visible = leftHand.visible = true;
+
+		rightHand.x = width - right_middle_finger_mcp.x;
+		leftHand.x = width - left_middle_finger_mcp.x;
+		rightHand.y = right_middle_finger_mcp.y;
+		leftHand.y = left_middle_finger_mcp.y;
+
+		new handParticles.Sprite(rightHand.x, rightHand.y, 5);
+		new handParticles.Sprite(leftHand.x, leftHand.y, 5);
+		
+	} else{
+		rightHand.visible = leftHand.visible = false;
 	}
 }
 
@@ -233,6 +271,27 @@ function generatePath(targets, value){
 				let target = new targets.Sprite();
 				target.y = targets.length * 25;
 				target.x = 250 + (targets.length*5)
+			}
+			break;
+		case 5:
+			while(targets.length < 10){
+				let target = new targets.Sprite()
+				target.text = targets.length;
+				if(targets.length < 5) target.y = headCalibrate.y + (targets.length * 25)
+					else target.y = headCalibrate.y - ((targets.length-10) * 25);
+				
+				target.x = headCalibrate.x - 200
+			}
+			break;
+		case 6:
+			while(targets.length < 10){
+				let target = new targets.Sprite()
+				target.text = targets.length;
+				
+				if(targets.length < 5) target.y = headCalibrate.y + 300 - (targets.length * 25)
+				else target.y = headCalibrate.y + 300 + ((targets.length-10) * 25)
+				
+				target.x = headCalibrate.x - 200
 			}
 			break;
 	}
