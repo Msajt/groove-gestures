@@ -157,17 +157,25 @@ let clickStartTime;
 let clickDuration = 2000;
 let clickRadius = 10;
 
-let gameState = 'game';
-let startButton, instructionsButton;
+let gameState = 'start';
+let startButton, instructionsButton, backgroundSprite;
 
 let music1, isPlayingMusic = false;
+
+let startButtonAnimation, instructionsButtonAnimation, selectedCursor, notSelectedCursor, backgroundStart, backgroundInstructions;
 
 // Under the Sea, I Will Survive, Shape of You, Kulikitaka, Chacarron
 
 function preload(){
 	handPose = ml5.handPose();
+	bgMusic = loadSound('./sounds/bg-sound.mp3');
 	music1 = loadSound('./sounds/baby_shark_short.mp3');
-
+	startButtonAnimation = loadAnimation('./arts/start-button.png', {frameSize: [250, 75], frames: 5});
+	instructionsButtonAnimation = loadAnimation('./arts/instructions-button.png', {frameSize: [250, 75], frames: 5});
+	selectedCursor = loadImage('./arts/selected.png');
+	notSelectedCursor = loadImage('./arts/not-selected.png');
+	backgroundStart = loadImage('./arts/background.png');
+	backgroundInstructions = loadImage('./arts/instructions-background.png');
 }
 
 function setup() {
@@ -204,7 +212,7 @@ function setup() {
 		moveSpawnerGroup.sequence = spawnerController;
 
 	danceMoveController = new Sprite(width/2, height-50, 10, 100, 'static');
-		danceMoveController.visible = true;
+		danceMoveController.visible = false;
 	textSize(20)
 
 	handIndex = new Sprite();
@@ -214,38 +222,47 @@ function setup() {
 		handThumb.collider = handIndex.collider = 'none'
 	rightHand = new Sprite();
 	leftHand = new Sprite();
-		rightHand.diameter = leftHand.diameter = 50;
+		rightHand.diameter = leftHand.diameter = 40;
 		//rightHand.collider = leftHand.collider = 'none';
 	handParticles = new Group();
 	handParticles.collider = 'none';
 	handParticles.direction = () => random(0, 360);
 	handParticles.vel.y = -6;
 	handParticles.life = 15;
+	handParticles.fill = 'white';
 
+	backgroundSprite = new Sprite(width/2, height/2, 960, 540, 'none');
+		backgroundSprite.fill = 'black';
+		backgroundSprite.layer = -2
+		backgroundSprite.image = backgroundStart;
 	startButton = new Sprite(width/2, height/2, 250, 75, 'none');
 		startButton.layer = -1;
-	instructionsButton = new Sprite();
-		instructionsButton.w = 250;
-		instructionsButton.h = 75;
-		instructionsButton.y = 350;
-		instructionsButton.collider = 'none'
-		instructionsButton.layer = -1
+		startButton.addAni('start', startButtonAnimation);
+	instructionsButton = new Sprite(width/2, 350, 250, 75, 'none');
+		instructionsButton.layer = -1;
+		instructionsButton.addAni('instructions', instructionsButtonAnimation);
 
 	headCalibrate = new Sprite(width/2, height/2 - 200, 50, 50, 'none');
-		// headCalibrate.visible = false;
+		headCalibrate.visible = false;
 
 	clickStartTime = millis();
+
+	allSprites.pixelPerfect = true;
+	bgMusic.loop();
+	//allSprites.debug = true
 }
 
 function draw() {
-	background('skyblue');
+	//background('skyblue');
 
 	//? ===== CAMERA =====
 	push();
 		translate(video.width, 0);
 		scale(-1, 1);
-		image(video, -1, 1, width, height);
+		image(video, -1, 1);
     pop();
+
+	
 	
 	//? ===== CAMERA =====
 
@@ -256,20 +273,31 @@ function draw() {
 			} else if(handIndex.overlapping(instructionsButton) && handThumb.overlapping(instructionsButton)){
 				clickAnimation() > 360 ? gameState = 'instructions' : null;
 			}
-
-		} else clickStartTime = millis();
+			new handParticles.Sprite(handIndex.x, handIndex.y, 5);
+			handIndex.image = selectedCursor;
+		} else {
+			handIndex.image = notSelectedCursor;
+			clickStartTime = millis();
+		}
 	pop()
 
 	if(gameState == 'main-menu'){
+		//background('black')
 		startButton.x = width/2
 		startButton.y = height/2
+		new handParticles.Sprite(backgroundSprite.x, backgroundSprite.y, 10);
+		
 	}
 	else if(gameState == 'instructions'){
+		backgroundSprite.image = backgroundInstructions;
 		instructionsButton.remove();
 		startButton.x = width - 140;
 		startButton.y = height - 75;
 	} 
 	else if(gameState == 'game'){
+		bgMusic.stop();
+		backgroundSprite.visible = false;
+
 		if(!isPlayingMusic){
 			music1.play();
 			isPlayingMusic = true;
@@ -344,7 +372,7 @@ function draw() {
 		handIndex.x = width - index_finger_tip.x;
 		handIndex.y = index_finger_tip.y;
 
-		handThumb.visible = handIndex.visible = true
+		handIndex.visible = true
 	} else {
 		handThumb.visible = handIndex.visible = false
 	}
@@ -362,10 +390,12 @@ function draw() {
 
 		new handParticles.Sprite(rightHand.x, rightHand.y, 5);
 		new handParticles.Sprite(leftHand.x, leftHand.y, 5);
-		
+		rightHand.color = (random(0, 255), random(0, 255), random(0, 255));
+		leftHand.color = (random(0, 255), random(0, 255), random(0, 255));		
 	} else{
 		rightHand.visible = leftHand.visible = false;
 	}
+
 }
 
 function generatePath(targets, value){
@@ -526,4 +556,3 @@ function clickAnimation(){
 	
 	return endAngle;
 }
-
