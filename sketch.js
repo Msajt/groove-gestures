@@ -16,127 +16,77 @@ let spawnerController = [
 		move_left: 9
 	},
 	{
-		time: 3,
+		time: 2,
 		move_right: 8,
 		move_left: 7
 	},
 	{
-		time: 3,
-		move_right: 5,
-		move_left: 6
-	},
-	{
-		time: .7,
-		move_right: 8,
-		move_left: 7
-	},
-	{
-		time: .7,
+		time: 2,
 		move_right: 5,
 		move_left: 6
 	},
 	//* Mommy shark
 	{
-		time: .8,
+		time: 2,
 		move_right: 5,
 		move_left: 6
 	},
 	{
-		time: .7,
-		move_right: 8,
-		move_left: 7
-	},
-	{
-		time: .7,
-		move_right: 5,
-		move_left: 6
-	},
-	{
-		time: .7,
+		time: 2,
 		move_right: 8,
 		move_left: 7
 	},
 	//* Daddy Shark
 	{
-		time: .8,
+		time: 2,
 		move_right: 5,
 		move_left: 6
 	},
 	{
-		time: .7,
-		move_right: 8,
-		move_left: 7
-	},
-	{
-		time: .7,
-		move_right: 5,
-		move_left: 6
-	},
-	{
-		time: .7,
+		time: 2,
 		move_right: 8,
 		move_left: 7
 	},
 	//* Grandma Shark
 	{
-		time: .8,
+		time: 2,
 		move_right: 5,
 		move_left: 6
 	},
 	{
-		time: .7,
-		move_right: 8,
-		move_left: 7
-	},
-	{
-		time: .7,
-		move_right: 5,
-		move_left: 6
-	},
-	{
-		time: .7,
+		time: 2,
 		move_right: 8,
 		move_left: 7
 	},
 	//* Grandpa Shark
 	{
-		time: .8,
+		time: 2,
 		move_right: 5,
 		move_left: 6
 	},
 	{
-		time: .7,
-		move_right: 8,
-		move_left: 7
-	},
-	{
-		time: .7,
-		move_right: 5,
-		move_left: 6
-	},
-	{
-		time: .7,
+		time: 2,
 		move_right: 8,
 		move_left: 7
 	},
 	//* The End
 	{
-		time: .8,
+		time: 1,
 		move_right: 9,
 		move_left: ''
 	},
 	{
-		time: .7,
+		time: 1,
 		move_right: '',
 		move_left: 10
 	},
 	{
-		time: .7,
+		time: 1,
 		move_right: 9,
 		move_left: ''
 	},
 	{
-		time: .7,
+		time: 1,
 		move_right: '',
 		move_left: 10
 	},
@@ -168,8 +118,6 @@ let startButtonAnimation, instructionsButtonAnimation,
 	selectedCursor, notSelectedCursor,
 	backgroundStart, backgroundInstructions, backgroundGame,
 	move01, move02, move03, move04, move05;
-
-// Under the Sea, I Will Survive, Shape of You, Kulikitaka, Chacarron
 
 function preload(){
 	handPose = ml5.handPose();
@@ -210,14 +158,14 @@ function setup() {
 	leftTargets = new Group();
 		leftTargets.color = 'yellow';
 		leftTargets.y = 150;
-		leftTargets.diameter = 10;
+		leftTargets.diameter = 25;
 		leftTargets.collider = 'none'
 
 	rightTargets = new Group();
-		rightTargets.color = 'purple';
+		rightTargets.color = '#BB5BE4';
 		rightTargets.y = 50;
 		rightTargets.x = 150;
-		rightTargets.diameter = 10;
+		rightTargets.diameter = 25;
 		rightTargets.collider = 'none'
 
 	moveSpawnerGroup = new Group();
@@ -302,9 +250,9 @@ function draw() {
 	pop()
 
 	if(gameState == 'main-menu'){
-		//background('black')
 		startButton.x = width/2
 		startButton.y = height/2
+		handParticles.layer = 3
 		new handParticles.Sprite(backgroundSprite.x, backgroundSprite.y, 10);
 		
 	}
@@ -328,12 +276,15 @@ function draw() {
 		timeCount = round(frameCount/60, 2);
 		
 		push()
+		stroke(0)
+		strokeWeight(5)
 		fill('white')
 		textSize(48)
 		text(timeCount, 200, height-25);
 		textSize(24)
 		text('PONTOS:', 10, height-70)
 		text('TEMPO:', 200, height-70)
+		text('Pinkfong - Baby Shark (Fast Version)', 10, 25)
 		textSize(80);
 		text(score, 10, height-10);
 		pop()
@@ -361,7 +312,7 @@ function draw() {
 			})
 		}
 
-		if(moveSpawnerGroup.length <= 0) text('Jogo Completo', 150, 150);
+		if(moveSpawnerGroup.length <= 0) gameState = 'credits';
 
 		if(moveSpawnerGroup.length > 0){
 			if(moveSpawnerGroup[0].overlaps(danceMoveController)){
@@ -371,7 +322,7 @@ function draw() {
 				let getMovementRight = moveSpawnerGroup[0].sequence.move_right;
 				let getMovementLeft = moveSpawnerGroup[0].sequence.move_left;
 				//console.log(getMovement);
-				setTimeout(() => { 
+				setTimeout(() => {
 					generatePath(leftTargets, getMovementLeft) 
 					generatePath(rightTargets, getMovementRight)
 					//console.log('teste');
@@ -388,16 +339,40 @@ function draw() {
 				moveSpawnerGroup[0].vel.x = -15;
 			}
 			//(moveSpawnerGroup[0].x < - 20) ? moveSpawnerGroup.shift() : null;
-			if(leftTargets.length > 0 && rightTargets.length > 0 && moveSpawnerGroup[0].overlapping(danceMoveController)){
-				if(leftHand.overlaps(leftTargets[0])) leftTargets[0].remove();
-				if(rightHand.overlaps(rightTargets[0])) rightTargets[0].remove();
-				
+			if(leftTargets.length > 0 && moveSpawnerGroup[0].overlapping(danceMoveController)){
+				leftHand.overlaps(leftTargets[0], collect)
+				rightHand.overlaps(leftTargets[0], collect)	
+			}
+			if(rightTargets.length > 0 && moveSpawnerGroup[0].overlapping(danceMoveController)){
+				leftHand.overlaps(rightTargets[0], collect)
+				rightHand.overlaps(rightTargets[0], collect)	
 			}
 		}
 
+	} 
+	else if(gameState == 'credits'){
+		// backgroundSprite.visible = false;
+		// startButton.visible = false;
+		// instructionsButton.visible = false;
+		handParticles.color = 'yellow'
+		new handParticles.Sprite(100, random(0, height), 10)
+		new handParticles.Sprite(width-100, random(0, height), 10)
+		new handParticles.Sprite(random(0, width), random(0, height), 10)
+		new handParticles.Sprite(random(0, width), random(0, height), 10)
+		background(backgroundStart);
+		push()
+		stroke(0)
+		strokeWeight(5)
+		fill('white')
+		textSize(48)
+		text('OBRIGADO POR JOGAR!', width/2-200, height/2)
+		textSize(80);
+		fill('magenta')
+		text(`${score}     pontos`, width/2-140, height/2 + 150);
+		pop()
 	}
 
-	if(hands.length == 1){
+	if(hands.length == 1 && gameState != 'game'){
 		//console.log(hands)
 		let { thumb_tip, index_finger_tip, middle_finger_mcp } = hands[0];
 		//let { right_middle_finger_mcp } = hands[0];
@@ -474,46 +449,50 @@ function generatePath(targets, value){
 			break;
 		//? ESQUERDA - CIMA
 		case 5:
-			while(targets.length < 10){
+			while(targets.length < 5){
 				let target = new targets.Sprite()
 				target.text = targets.length;
-				if(targets.length < 5) target.y = headCalibrate.y + (targets.length * 25)
-					else target.y = headCalibrate.y - ((targets.length-10) * 25);
+				// if(targets.length <= 5) 
+					target.y = headCalibrate.y + (targets.length * 25)
+					//else target.y = headCalibrate.y - ((targets.length-10) * 25);
 				
 				target.x = headCalibrate.x - 200
 			}
 			break;
 		//? ESQUERDA - BAIXO
 		case 6:
-			while(targets.length < 10){
+			while(targets.length < 5){
 				let target = new targets.Sprite()
 				target.text = targets.length;
 				
-				if(targets.length < 5) target.y = headCalibrate.y + 300 - (targets.length * 25)
-				else target.y = headCalibrate.y + 300 + ((targets.length-10) * 25)
+				// if(targets.length <= 5) 
+					target.y = headCalibrate.y + 300 - (targets.length * 25)
+				//else target.y = headCalibrate.y + 300 + ((targets.length-10) * 25)
 				
 				target.x = headCalibrate.x - 200
 			}
 			break;
 		//? DIREITA - CIMA
 		case 7:
-			while(targets.length < 10){
+			while(targets.length < 5){
 				let target = new targets.Sprite()
 				target.text = targets.length;
-				if(targets.length < 5) target.y = headCalibrate.y + (targets.length * 25)
-					else target.y = headCalibrate.y - ((targets.length-10) * 25);
+				//if(targets.length < 5) 
+					target.y = headCalibrate.y + (targets.length * 25)
+					//else target.y = headCalibrate.y - ((targets.length-10) * 25);
 				
 				target.x = headCalibrate.x + 200
 			}
 			break;
 		//? DIREITA - CIMA
 		case 8:
-			while(targets.length < 10){
+			while(targets.length < 5){
 				let target = new targets.Sprite()
 				target.text = targets.length;
 				
-				if(targets.length < 5) target.y = headCalibrate.y + 300 - (targets.length * 25)
-				else target.y = headCalibrate.y + 300 + ((targets.length-10) * 25)
+				//if(targets.length < 5)
+					target.y = headCalibrate.y + 300 - (targets.length * 25)
+				//else target.y = headCalibrate.y + 300 + ((targets.length-10) * 25)
 				
 				target.x = headCalibrate.x + 200
 			}
@@ -594,4 +573,9 @@ function clickAnimation(){
 	arc(30, 30, 25 * 2, 25 * 2, 0, endAngle);
 	
 	return endAngle;
+}
+
+function collect(hand, target){
+	target.remove();
+	score++;
 }
