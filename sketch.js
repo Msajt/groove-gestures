@@ -160,9 +160,14 @@ let clickRadius = 10;
 let gameState = 'start';
 let startButton, instructionsButton, backgroundSprite;
 
-let music1, isPlayingMusic = false;
+let music1, bgMusic, isPlayingMusic = false;
 
-let startButtonAnimation, instructionsButtonAnimation, selectedCursor, notSelectedCursor, backgroundStart, backgroundInstructions;
+let score = 0, pixelatedFont;
+
+let startButtonAnimation, instructionsButtonAnimation,
+	selectedCursor, notSelectedCursor,
+	backgroundStart, backgroundInstructions, backgroundGame,
+	move01, move02, move03, move04, move05;
 
 // Under the Sea, I Will Survive, Shape of You, Kulikitaka, Chacarron
 
@@ -176,6 +181,13 @@ function preload(){
 	notSelectedCursor = loadImage('./arts/not-selected.png');
 	backgroundStart = loadImage('./arts/background.png');
 	backgroundInstructions = loadImage('./arts/instructions-background.png');
+	backgroundGame = loadImage('./arts/game-background.png');
+	move01 = loadImage('./arts/dance-move-01.png');
+	move02 = loadImage('./arts/dance-move-02.png');
+	move03 = loadImage('./arts/dance-move-03.png');
+	move04 = loadImage('./arts/dance-move-04.png');
+	move05 = loadImage('./arts/dance-move-05.png');
+	pixelatedFont = loadFont('./arts/pixelated.ttf');
 }
 
 function setup() {
@@ -210,6 +222,11 @@ function setup() {
 
 	moveSpawnerGroup = new Group();
 		moveSpawnerGroup.sequence = spawnerController;
+		// moveSpawnerGroup.addAni('move01', move01);
+		// moveSpawnerGroup.addAni('move02', move02);
+		// moveSpawnerGroup.addAni('move03', move03);
+		// moveSpawnerGroup.addAni('move04', move04);
+		// moveSpawnerGroup.addAni('move05', move05);
 
 	danceMoveController = new Sprite(width/2, height-50, 10, 100, 'static');
 		danceMoveController.visible = false;
@@ -230,6 +247,7 @@ function setup() {
 	handParticles.vel.y = -6;
 	handParticles.life = 15;
 	handParticles.fill = 'white';
+	handParticles.layer = 0;
 
 	backgroundSprite = new Sprite(width/2, height/2, 960, 540, 'none');
 		backgroundSprite.fill = 'black';
@@ -249,10 +267,12 @@ function setup() {
 
 	allSprites.pixelPerfect = true;
 	bgMusic.loop();
+	textFont(pixelatedFont);
 	//allSprites.debug = true
 }
 
 function draw() {
+	noSmooth()
 	//background('skyblue');
 
 	//? ===== CAMERA =====
@@ -297,6 +317,7 @@ function draw() {
 	else if(gameState == 'game'){
 		bgMusic.stop();
 		backgroundSprite.visible = false;
+		background(backgroundGame);
 
 		if(!isPlayingMusic){
 			music1.play();
@@ -305,7 +326,17 @@ function draw() {
 			instructionsButton.x = -1000
 		}
 		timeCount = round(frameCount/60, 2);
-		text(timeCount, 100, 100);
+		
+		push()
+		fill('white')
+		textSize(48)
+		text(timeCount, 200, height-25);
+		textSize(24)
+		text('PONTOS:', 10, height-70)
+		text('TEMPO:', 200, height-70)
+		textSize(80);
+		text(score, 10, height-10);
+		pop()
 
 		//* Controle do usuário
 		//^		Fazer controle utilizando as mãos
@@ -321,6 +352,12 @@ function draw() {
 				spawnerSprite.y = height - 50
 				spawnerSprite.collider = 'none'
 				spawnerSprite.sequence = {time: item.time, move_right: item.move_right, move_left: item.move_left}
+				//* Sprites
+				if(item.move_right == 5 && item.move_left == 6) spawnerSprite.image = move02;
+				else if(item.move_right == 8 && item.move_left == 7) spawnerSprite.image = move01;
+				else if(item.move_right == 10 && item.move_left == 9) spawnerSprite.image = move03;
+				else if(item.move_right == 9 && item.move_left == '') spawnerSprite.image = move04;
+				else if(item.move_right == '' && item.move_left == 10) spawnerSprite.image = move05;
 			})
 		}
 
@@ -469,7 +506,7 @@ function generatePath(targets, value){
 				target.x = headCalibrate.x + 200
 			}
 			break;
-		//? ESQUERDA - CIMA
+		//? DIREITA - CIMA
 		case 8:
 			while(targets.length < 10){
 				let target = new targets.Sprite()
@@ -481,6 +518,7 @@ function generatePath(targets, value){
 				target.x = headCalibrate.x + 200
 			}
 			break;
+		//? ESQUERDA - DESCENDO BRAÇO
 		case 9:
 			while(targets.length < 10){
 				let target = new targets.Sprite()
@@ -489,6 +527,7 @@ function generatePath(targets, value){
 				target.x = headCalibrate.x - 200
 			}
 			break;
+		//? DIREITA - DESCENDO BRAÇO
 		case 10:
 			while(targets.length < 10){
 				let target = new targets.Sprite()
